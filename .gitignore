@@ -1,6 +1,6 @@
 netsim/__pycache__
 plot/*.png
-proxy/proxy.py
+#proxy/proxy.py
 *.log
 .DS_STORE
 
