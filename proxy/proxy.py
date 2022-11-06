@@ -14,8 +14,9 @@ def send_to_end(endSocket, message):
 # detect \n as the end of the message
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket):
-    tmp_massage = ""
     tmp_massage = endSocket.recv(2048)
+    while tmp_massage != b"":
+        tmp_massage = tmp_massage + endSocket.recv(2048)
     if tmp_massage == b"":
         return (False, "")
     return (True, tmp_massage)
