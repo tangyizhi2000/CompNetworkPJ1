@@ -16,18 +16,8 @@ def send_to_end(endSocket, message):
 # detect \n as the end of the message
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket):
-    all_messages = ""
-    tmp_massage = ""
-    while '\n' not in tmp_massage:
-        tmp_massage = endSocket.recv(2048)
-        print(tmp_massage)
-        tmp_massage = tmp_massage.decode()
-        print(tmp_massage)
-        # if the message is empty, there is a disconnection
-        if tmp_massage == "":
-            return (False, "")
-        all_messages += tmp_massage
-    all_messages = all_messages[:all_messages.find('\n')+1]
+    all_messages = endSocket.recv(2048).decode()
+
     return (True, all_messages)
 
 def connect(recvSocket, fake_ip, web_server_ip):
