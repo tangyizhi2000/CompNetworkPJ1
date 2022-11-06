@@ -8,7 +8,9 @@ total_num_connections = 0
 
 # send a message to the target socket
 def send_to_end(endSocket, message):
-    endSocket.send(message.encode())
+    message = message.encode()
+    print(message)
+    endSocket.send(message)
 
 # receive from a socket
 # detect \n as the end of the message
