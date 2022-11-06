@@ -16,9 +16,9 @@ def connect(recvSocket):
         sendSocket = socket(AF_INET, SOCK_STREAM)
         sendSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
         sendSocket.connect((web_server_ip, 8080)) # connect to the server
-
         message = connectionSocket.recv(2048) 
         capitalizedSentence = message.decode().upper()
+        print(ts, message, capitalizedSentence)
         time.sleep(3)
         connectionSocket.send(capitalizedSentence.encode())
         connectionSocket.close()
