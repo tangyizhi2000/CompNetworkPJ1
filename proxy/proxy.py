@@ -19,7 +19,9 @@ def receive_from_end(endSocket):
     all_messages = ""
     tmp_massage = ""
     while '\n' not in tmp_massage:
-        tmp_massage = endSocket.recv(2048).decode()
+        tmp_massage = endSocket.recv(2048)
+        print(tmp_massage)
+        tmp_massage = tmp_massage.decode()
         # if the message is empty, there is a disconnection
         if tmp_massage == "":
             return (False, "")
