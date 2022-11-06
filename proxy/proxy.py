@@ -6,22 +6,52 @@ import time
 max_num_connections = 10
 total_num_connections = 0
 
+# send a message to the target socket
+def send_to_end(endSocket, message):
+    endSocket.send(message.encode())
+
+# receive from a socket
+# detect \n as the end of the message
+# if the message is empty, there is a disconnection
+def receive_from_end(endSocket):
+    all_messages = ""
+    tmp_massage = ""
+    while '\n' not in tmp_massage:
+        tmp_massage = endSocket.recv(2048).decode()
+        # if the message is empty, there is a disconnection
+        if tmp_massage == "":
+            return (False, "")
+        all_messages += tmp_massage
+    all_messages = all_messages[:all_messages.find('\n')+1]
+    return (True, all_messages)
+
 def connect(recvSocket):
     while True:
         # Receive a connection from client
-        connectionSocket, addr = recvSocket.accept()
+        clientSocket, addr = recvSocket.accept()
         # ts is used to calculate the bandwidth
         ts = time.time()
         # Establish a connection with a server
-        sendSocket = socket(AF_INET, SOCK_STREAM)
-        sendSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
-        sendSocket.connect((web_server_ip, 8080)) # connect to the server
-        message = connectionSocket.recv(2048) 
-        capitalizedSentence = message.decode().upper()
-        print(ts, message, capitalizedSentence)
-        time.sleep(3)
-        connectionSocket.send(capitalizedSentence.encode())
-        connectionSocket.close()
+        serverSocket = socket(AF_INET, SOCK_STREAM)
+        serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
+        serverSocket.connect((web_server_ip, 8080)) # connect to the server
+        while True:
+            # receive from client
+            status, client_messages = receive_from_end(clientSocket)
+            if not status:
+                break
+            # send to server
+            send_to_end(serverSocket, client_messages)
+            # receive from server
+            status, server_response = receive_from_end(serverSocket)
+            if not status:
+                break
+            # send back to client
+            send_to_end(clientSocket, server_response)
+        # close the relevant connections
+        clientSocket.close()
+        serverSocket.close()
+
 
 if __name__ == '__main__':
     # commandline ./proxy <log> <alpha> <listen-port> <fake-ip> <web-server-ip>
