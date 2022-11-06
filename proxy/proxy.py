@@ -49,6 +49,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 break
             # send back to client
             send_to_end(clientSocket, server_response)
+            print(client_messages, server_response)
         # close the relevant connections
         clientSocket.close()
         serverSocket.close()
