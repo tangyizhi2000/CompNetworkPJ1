@@ -46,7 +46,6 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 break
             # send to server
             send_to_end(serverSocket, client_messages)
-            print("client finish sending")
             # receive from server
             status, server_response = receive_from_end(serverSocket)
             if not status:
