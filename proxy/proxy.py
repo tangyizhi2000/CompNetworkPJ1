@@ -35,9 +35,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
         # Establish a connection with a server
         serverSocket = socket(AF_INET, SOCK_STREAM)
         serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
-        print("OK1")
         serverSocket.connect((web_server_ip, 8080)) # connect to the server
-        print("OK2")
         while True:
             # receive from client
             status, client_messages = receive_from_end(clientSocket)
@@ -46,10 +44,12 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 break
             # send to server
             send_to_end(serverSocket, client_messages)
+            print("client finish sending")
             # receive from server
             status, server_response = receive_from_end(serverSocket)
             if not status:
                 break
+            print("server response:", server_response)
             # send back to client
             send_to_end(clientSocket, server_response)
             
