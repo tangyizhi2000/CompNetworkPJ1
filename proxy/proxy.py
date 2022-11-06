@@ -18,7 +18,7 @@ def send_to_end(endSocket, message):
 def receive_from_end(endSocket):
     all_messages = ""
     tmp_massage = ""
-    tmp_massage = endSocket.recv(2048).decode("utf-16", "ignore")
+    tmp_massage = endSocket.recv(2048).decode("utf-8", "ignore")
     if tmp_massage == "":
         return (False, "")
     return (True, tmp_massage)
