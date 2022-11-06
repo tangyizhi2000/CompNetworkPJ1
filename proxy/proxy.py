@@ -15,6 +15,7 @@ def send_to_end(endSocket, message):
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket):
     tmp_massage = endSocket.recv(2048)
+    print(tmp_massage)
     all_messages = tmp_massage
     while tmp_massage != b"":
         tmp_massage = endSocket.recv(2048)
