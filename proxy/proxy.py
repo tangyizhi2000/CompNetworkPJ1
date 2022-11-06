@@ -25,7 +25,8 @@ def receive_from_end(endSocket):
     all_messages = all_messages[:all_messages.find('\n')+1]
     return (True, all_messages)
 
-def connect(recvSocket):
+def connect(recvSocket, fake_ip, web_server_ip):
+    print(recvSocket, fake_ip, web_server_ip)
     while True:
         # Receive a connection from client
         clientSocket, addr = recvSocket.accept()
@@ -63,5 +64,5 @@ if __name__ == '__main__':
     # Establish a connection with clients
     # allow multiple clients to connect concurrently as long as the total number of clents are less than maximum
     for i in range(max_num_connections):
-        worker = Thread(target=connect, args=(recvSocket,))
+        worker = Thread(target=connect, args=(recvSocket, fake_ip, web_server_ip))
         worker.start()
