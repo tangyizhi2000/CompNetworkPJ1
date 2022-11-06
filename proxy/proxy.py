@@ -8,7 +8,7 @@ total_num_connections = 0
 
 # send a message to the target socket
 def send_to_end(endSocket, message):
-    endSocket.send(message.encode("utf-8", "ignore"))
+    endSocket.send(message)
 
 # receive from a socket
 # detect \n as the end of the message
@@ -16,7 +16,7 @@ def send_to_end(endSocket, message):
 def receive_from_end(endSocket):
     all_messages = ""
     tmp_massage = ""
-    tmp_massage = endSocket.recv(2048).decode("gzip", "ignore")
+    tmp_massage = endSocket.recv(2048)
     if tmp_massage == "":
         return (False, "")
     return (True, tmp_massage)
