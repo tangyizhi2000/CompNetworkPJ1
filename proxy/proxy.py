@@ -16,7 +16,7 @@ def send_to_end(endSocket, message):
 # detect \n as the end of the message
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket):
-    all_messages = endSocket.recv(2048).decode('utf-8', 'ignore'))
+    all_messages = endSocket.recv(2048).decode('utf-8', 'ignore')
 
     return (True, all_messages)
 
