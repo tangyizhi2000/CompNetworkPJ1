@@ -36,9 +36,9 @@ def connect(recvSocket, fake_ip, web_server_ip):
         while True:
             # receive from client
             status, client_messages = receive_from_end(clientSocket)
-            print("client message:", client_messages, ts)
             if not status:
                 break
+            print("client message:", client_messages, ts)
             # send to server
             send_to_end(serverSocket, client_messages)
             # receive from server
