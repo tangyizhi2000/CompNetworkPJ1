@@ -15,11 +15,13 @@ def send_to_end(endSocket, message):
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket):
     tmp_massage = endSocket.recv(2048)
+    all_messages = tmp_massage
     while tmp_massage != b"":
-        tmp_massage = tmp_massage + endSocket.recv(2048)
-    if tmp_massage == b"":
+        tmp_massage = endSocket.recv(2048)
+        all_messages = all_messages + tmp_massage
+    if all_messages == b"":
         return (False, "")
-    return (True, tmp_massage)
+    return (True, all_messages)
 
 def connect(recvSocket, fake_ip, web_server_ip):
     while True:
