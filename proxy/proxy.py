@@ -16,12 +16,14 @@ def send_to_end(endSocket, message):
 # detect \n as the end of the message
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket):
-    all_messages = endSocket.recv(2048).decode('utf-8', 'ignore')
-
-    return (True, all_messages)
+    all_messages = ""
+    tmp_massage = ""
+    tmp_massage = endSocket.recv(2048).decode("utf-16", "ignore")
+    if tmp_massage == "":
+        return (False, "")
+    return (True, tmp_massage)
 
 def connect(recvSocket, fake_ip, web_server_ip):
-    print(recvSocket, fake_ip, web_server_ip)
     while True:
         # Receive a connection from client
         clientSocket, addr = recvSocket.accept()
