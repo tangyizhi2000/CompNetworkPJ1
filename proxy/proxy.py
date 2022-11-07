@@ -7,7 +7,8 @@ max_num_connections = 10
 total_num_connections = 0
 mpd_xml = ""
 alpha = 0
-T_current = 45514
+T_current = -1
+T_current_list = []
 bitrate_list = []
 
 # record time and send message
@@ -22,10 +23,14 @@ def time_and_send(serverSocket, client_message, load):
     return status, response
 
 def calculate_throughput(size, tf, ts):
-    global T_current, alpha
+    global T_current, alpha, T_current_list
+    if T_current == -1 and len(bitrate_list) > 1:
+        T_current = bitrate_list[0]
     T = float((size - sys.getsizeof(b'')) / (tf - ts))
-    print(type(T_current), type(T), type(alpha))
     T_current = alpha * T - (1 - alpha) * T_current
+    T_current_list.append(T_current)
+    print("T_current now changes to", T_current)
+    print("!!!!", T_current_list)
 
 # send a message to the target socket
 def send_to_end(endSocket, message):
@@ -40,9 +45,7 @@ def parse_mpd():
             if mpd_xml[i].isnumeric():
                 cur_bitrate = cur_bitrate * 10 + int(mpd_xml[i])
         bitrate_list.append(cur_bitrate)
-        bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))
-    print("!!!!!!!", bitrate_list)
-    
+        bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))    
 
 '''
 BigBuckBunny_6s.mpd
