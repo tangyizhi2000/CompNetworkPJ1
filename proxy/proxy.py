@@ -109,12 +109,8 @@ def handle_video_request(client_messages):
     # replace client's request with the appropriate bitrate
     client_messages.replace(requested_bitrate.encode(), str(actual_bitrate).encode())
     # find the sequence number the client is requesting
-    sequence_num = 0
     seq_loc = decode_message.find('/BigBuckBunny_6s')
-    for i in range(seq_loc+16, seq_loc+20):
-        if decode_message[i].isnumeric():
-            sequence_num = sequence_num * 10 + int(decode_message[i])
-    return client_messages, actual_bitrate, sequence_num
+    return client_messages, actual_bitrate, decode_message[seq_loc, seq_loc+20]
 
 # receive from a socket
 # detect \n as the end of the message
