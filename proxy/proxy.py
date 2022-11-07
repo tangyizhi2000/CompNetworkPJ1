@@ -10,25 +10,28 @@ alpha = 0
 T_current = -1
 T_current_list = []
 bitrate_list = []
+log_list = []
 
 # record time and send message
 # after timing ts and tf, we can update the bandwidth prediction
-def time_and_send(serverSocket, client_message, load):
+def time_and_send(serverSocket, client_message, load, video_chunk):
     ts = time.time()
     send_to_end(serverSocket, client_message)
     status, response = receive_from_end(serverSocket, load)
     tf = time.time()
     # calculate throughput, T = B / (tf-ts)
-    calculate_throughput(sys.getsizeof(response), tf, ts)
+    if video_chunk:
+        calculate_throughput(sys.getsizeof(response), tf, ts)
     return status, response
 
 def calculate_throughput(size, tf, ts):
-    global T_current, alpha, T_current_list
+    global T_current, alpha, T_current_list, log_list
     if T_current == -1 and len(bitrate_list) > 1:
         T_current = bitrate_list[0]
     T = float((size - sys.getsizeof(b'')) / (tf - ts))
     T_current = alpha * T - (1 - alpha) * T_current
     T_current_list.append(T_current)
+    log_list.append(str(time.time()) + " " + str(tf - ts) + " " + str(T) + " " + str(T_current))
 
 # send a message to the target socket
 def send_to_end(endSocket, message):
@@ -85,13 +88,13 @@ BigBuckBunny_6s_nolist.mpd
 '''
 def handle_mpd(client_messages, serverSocket):
     # request a copy of mpd.xml
-    status1, mpd_file = time_and_send(serverSocket, client_messages, 2048)
+    status1, mpd_file = time_and_send(serverSocket, client_messages, 2048, False)
     global mpd_xml
     mpd_xml = mpd_file.decode()
     parse_mpd()
     # replace 'BigBuckBunny_6s.mpd' with 'BigBuckBunny_6s_nolist.mpd' and request server a copy of it
     mpd_nolist_request = client_messages.replace(b'BigBuckBunny_6s.mpd', b'BigBuckBunny_6s_nolist.mpd')
-    status2, mpd_no_list_file = time_and_send(serverSocket, mpd_nolist_request, 2048)
+    status2, mpd_no_list_file = time_and_send(serverSocket, mpd_nolist_request, 2048, False)
     # status is whether server disconnects; mpd_no_list_file is the thing we need to return
     return status1 and status2, mpd_no_list_file
 
@@ -141,13 +144,15 @@ def connect(recvSocket, fake_ip, web_server_ip):
                     break
                 send_to_end(clientSocket, mpd_no_list_file)
             elif b'bps/BigBuckBunny_6s' in client_messages:
-                client_messages, bitrate, seq_num = handle_video_request(client_messages)
-                status, response = time_and_send(serverSocket, client_messages, bitrate * 10)
+                client_messages, actual_bitrate, seq_num = handle_video_request(client_messages)
+                status, response = time_and_send(serverSocket, client_messages, actual_bitrate * 10, True)
+                log_list[-1] += (" " + str(actual_bitrate) + " " + str(web_server_ip))
+                print(log_list[-1])
                 if not status:
                     break
                 send_to_end(clientSocket, response)
                 print("--------------------------------")
-                print("Video Response:", bitrate, seq_num, response[:100])
+                print("Video Response:", actual_bitrate, seq_num, response[:500])
             else:
                 print("--------------------------------")
                 print("client message:", client_messages)
@@ -170,6 +175,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
 if __name__ == '__main__':
     # commandline ./proxy <log> <alpha> <listen-port> <fake-ip> <web-server-ip>
     file_path, alpha, listen_port, fake_ip, web_server_ip = sys.argv[1], float(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5]
+    log_file = open(file_path, 'w')
     recvSocket = socket(AF_INET,SOCK_STREAM) ## create socket listening for requests from client
     recvSocket.bind(('', listen_port)) # Reachable by any address on port listen_port
     recvSocket.listen(max_num_connections) # TODO: what is the maximum concurrent connections allowed?
