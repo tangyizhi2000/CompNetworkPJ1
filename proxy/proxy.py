@@ -123,8 +123,16 @@ def receive_from_end(endSocket, load):
     print("BEAUTIFUL")
     all_message = temp_message
     while b'Content-Length' in temp_message:
-        print(temp_message[:temp_message.find(b'\r\n\r\n')])
-        temp_message = endSocket.recv(524280)
+        # how many bits left we need to receive
+        content_length = 0
+        length_loc = temp_message.find(b'Content-Length')
+        for i in range(length_loc, length_loc + 10):
+            if temp_message[i].isnumeric():
+                content_length = content_length * 10 + int(temp_message[i])
+            else:
+                break
+        print(temp_message[temp_message.find(b'Content-Length'):temp_message.find(b'Content-Length')+10], content_length)
+        temp_message = endSocket.recv(content_length)
         print("FIRST")
         all_message = all_message + temp_message
     print("Returned")
