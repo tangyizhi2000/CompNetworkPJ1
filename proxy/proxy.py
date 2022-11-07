@@ -103,16 +103,18 @@ def handle_video_request(client_messages):
     # parse the client request, and request for appropriate video according to throughput
     decode_message = client_messages.decode()
     # find the client requested bitrate
-    info_loc = decode_message.find('/bunny_')
+    info_loc = decode_message.find('/bunny_') + len('/bunny_')
     requested_bitrate = ""
     for i in range(info_loc, info_loc + 20):
         if decode_message[i].isnumeric():
             requested_bitrate += decode_message[i]
+        else:
+            break
     # find appropriate bitrate
     actual_bitrate = choose_bitrate(int(requested_bitrate))
     # replace client's request with the appropriate bitrate
     client_messages.replace(requested_bitrate.encode(), str(actual_bitrate).encode())
-    print(client_messages)
+    print("!!!", client_messages)
     # find the sequence number the client is requesting
     seq_loc = decode_message.find('/BigBuckBunny_6s')
     return client_messages, actual_bitrate, decode_message[seq_loc:seq_loc+20]
