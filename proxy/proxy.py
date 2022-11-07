@@ -10,6 +10,11 @@ total_num_connections = 0
 def send_to_end(endSocket, message):
     endSocket.send(message)
 
+def handle_mpd(serverSocket):
+    status, server_response = receive_from_end(serverSocket, 2048)
+    print(server_response.decode())
+    return status
+
 # receive from a socket
 # detect \n as the end of the message
 # if the message is empty, there is a disconnection
@@ -34,21 +39,26 @@ def connect(recvSocket, fake_ip, web_server_ip):
             status, client_messages = receive_from_end(clientSocket, 2048)
             if not status:
                 break
+            # MPD file request, save the MPD file
             if b'BigBuckBunny_6s.mpd' in client_messages:
-                print('MPD', client_messages)
+                send_to_end(serverSocket, client_messages)
+                status = handle_mpd(serverSocket)
+                if not status:
+                    break
             if b'BigBuckBunny_6s' in client_messages:
                 print('BigBuckBunny_6s', client_messages)
-            print("client message:", client_messages, ts)
-            # send to server
-            send_to_end(serverSocket, client_messages)
-            # receive from server
-            status, server_response = receive_from_end(serverSocket, 10067431)
-            if not status:
-                break
-            print("server response:", server_response)
-            # send back to client
-            send_to_end(clientSocket, server_response)
-            
+            else:
+                print("client message:", client_messages, ts)
+                # send to server
+                send_to_end(serverSocket, client_messages)
+                # receive from server
+                status, server_response = receive_from_end(serverSocket, 10067431)
+                if not status:
+                    break
+                print("server response:", server_response)
+                # send back to client
+                send_to_end(clientSocket, server_response)
+                
         # close the relevant connections
         clientSocket.close()
         serverSocket.close()
