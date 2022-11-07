@@ -132,7 +132,7 @@ def receive_from_end(endSocket, load):
                 content_length = content_length * 10 + int(decode_message[i])
             else:
                 break
-        print(temp_message[temp_message.find(b'Content-Length'):temp_message.find(b'Content-Length')+10], content_length)
+        print(temp_message[temp_message.find(b'Content-Length'):temp_message.find(b'Content-Length')+20], content_length)
         temp_message = endSocket.recv(content_length)
         print("FIRST")
         all_message = all_message + temp_message
@@ -180,7 +180,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 if not status:
                     break
                 print("--------------------------------")
-                print("server response:", server_response)
+                print("server response:", server_response[:1000])
                 # send back to client
                 send_to_end(clientSocket, server_response)
                 
