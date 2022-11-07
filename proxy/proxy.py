@@ -181,6 +181,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                     break
                 send_to_end(clientSocket, response)
                 print("--------------------------------")
+                print("Proxy request", response)
                 print("Video Response:", actual_bitrate, seq_num, response[:500])
             else:
                 print("--------------------------------")
