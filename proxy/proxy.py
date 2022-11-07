@@ -131,7 +131,7 @@ def receive_from_end(endSocket, load):
                 content_length += temp_header[i]
             else:
                 break
-        content_length = int(content_length)
+        
         print(temp_message[temp_message.find(b'Content-Length'):temp_message.find(b'Content-Length')+25], content_length)
         temp_message = endSocket.recv(content_length)
         print("FIRST")
