@@ -121,6 +121,7 @@ def extract_content_length(temp_header):
     content_length = ""
     length_loc = temp_header.find('Content-Length')
     for i in range(length_loc + len('Content-Length') + 1, len(temp_header)):
+        print("!", temp_header[i])
         if temp_header[i] >= '0' and temp_header[i] <= '9':
             content_length += temp_header[i]
         else:
