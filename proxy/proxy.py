@@ -13,8 +13,8 @@ def send_to_end(endSocket, message):
 # receive from a socket
 # detect \n as the end of the message
 # if the message is empty, there is a disconnection
-def receive_from_end(endSocket):
-    all_messages = endSocket.recv(100674310)
+def receive_from_end(endSocket, load):
+    all_messages = endSocket.recv(load)
     if all_messages == b"":
         return (False, "")
     return (True, all_messages)
@@ -31,14 +31,18 @@ def connect(recvSocket, fake_ip, web_server_ip):
         serverSocket.connect((web_server_ip, 8080)) # connect to the server
         while True:
             # receive from client
-            status, client_messages = receive_from_end(clientSocket)
+            status, client_messages = receive_from_end(clientSocket, 2048)
             if not status:
                 break
+            if b'BigBuckBunny_6s.mpd' in client_messages:
+                print('MPD', client_messages)
+            if b'BigBuckBunny_6s' in client_messages:
+                print('BigBuckBunny_6s', client_messages)
             print("client message:", client_messages, ts)
             # send to server
             send_to_end(serverSocket, client_messages)
             # receive from server
-            status, server_response = receive_from_end(serverSocket)
+            status, server_response = receive_from_end(serverSocket, 10067431)
             if not status:
                 break
             print("server response:", server_response)
