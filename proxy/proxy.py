@@ -160,7 +160,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
         serverSocket.connect((web_server_ip, 8080)) # connect to the server
         while True:
             # receive from client
-            status, client_messages = receive_from_end(clientSocket, 2048)
+            status, client_messages = receive_from_end(clientSocket)
             if not status:
                 break
             # MPD file request, save the MPD file
@@ -188,7 +188,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 # send to server
                 send_to_end(serverSocket, client_messages)
                 # receive from server
-                status, server_response = receive_from_end(serverSocket, 10067431)
+                status, server_response = receive_from_end(serverSocket)
                 if not status:
                     break
                 # send back to client
