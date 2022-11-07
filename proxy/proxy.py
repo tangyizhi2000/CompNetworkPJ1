@@ -29,7 +29,7 @@ def calculate_throughput(size, tf, ts):
     T = float((size - sys.getsizeof(b'')) / (tf - ts))
     T_current = alpha * T - (1 - alpha) * T_current
     T_current_list.append(T_current)
-    print("T_current now changes to", T_current)
+    print("T_current now changes to", T_current, alpha)
     print("!!!!", T_current_list)
 
 # send a message to the target socket
