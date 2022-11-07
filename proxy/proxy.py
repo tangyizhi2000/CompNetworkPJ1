@@ -128,7 +128,7 @@ def extract_content_length(temp_header):
         else:
             break
     content_length = int(content_length)
-    print("content length", content_length)
+    print("content length", content_length, temp_header)
     return content_length
 
 # receive from a socket
@@ -181,7 +181,6 @@ def connect(recvSocket, fake_ip, web_server_ip):
                     break
                 send_to_end(clientSocket, response)
                 print("--------------------------------")
-                print("Proxy request", response)
                 print("Video Response:", actual_bitrate, seq_num, response[:500])
             else:
                 print("--------------------------------")
