@@ -123,8 +123,9 @@ def receive_from_end(endSocket, load):
     print("BEAUTIFUL")
     all_message = temp_message
     while b'Content-Length' in temp_message:
+        print(temp_message[:temp_message.find(b'\r\n\r\n')])
         temp_message = endSocket.recv(524280)
-        print(temp_message[temp_message.find(b'\r\n\r\n'):2000])
+        print("FIRST")
         all_message = all_message + temp_message
     print("Returned")
     return (True, all_message)
