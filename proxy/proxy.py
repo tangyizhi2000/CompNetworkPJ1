@@ -125,8 +125,8 @@ def receive_from_end(endSocket, load):
     while b'Content-Length' in temp_message:
         # how many bits left we need to receive
         content_length = 0
-        decode_message = temp_message.decode()
-        length_loc = decode_message.find(b'Content-Length')
+        decode_message = temp_message.decode('utf-8', 'ignore')
+        length_loc = decode_message.find('Content-Length')
         for i in range(length_loc, length_loc + 10):
             if decode_message[i].isnumeric():
                 content_length = content_length * 10 + int(decode_message[i])
