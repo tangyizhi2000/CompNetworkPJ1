@@ -15,10 +15,10 @@ log_list = []
 
 # record time and send message
 # after timing ts and tf, we can update the bandwidth prediction
-def time_and_send(serverSocket, client_message, load, video_chunk):
+def time_and_send(serverSocket, client_message, video_chunk):
     ts = time.time()
     send_to_end(serverSocket, client_message)
-    status, response = receive_from_end(serverSocket, load)
+    status, response = receive_from_end(serverSocket)
     tf = time.time()
     # calculate throughput, T = B / (tf-ts)
     if video_chunk:
@@ -89,13 +89,13 @@ BigBuckBunny_6s_nolist.mpd
 '''
 def handle_mpd(client_messages, serverSocket):
     # request a copy of mpd.xml
-    status1, mpd_file = time_and_send(serverSocket, client_messages, 2048, False)
+    status1, mpd_file = time_and_send(serverSocket, client_messages, False)
     global mpd_xml
     mpd_xml = mpd_file.decode()
     parse_mpd()
     # replace 'BigBuckBunny_6s.mpd' with 'BigBuckBunny_6s_nolist.mpd' and request server a copy of it
     mpd_nolist_request = client_messages.replace(b'BigBuckBunny_6s.mpd', b'BigBuckBunny_6s_nolist.mpd')
-    status2, mpd_no_list_file = time_and_send(serverSocket, mpd_nolist_request, 2048, False)
+    status2, mpd_no_list_file = time_and_send(serverSocket, mpd_nolist_request, False)
     # status is whether server disconnects; mpd_no_list_file is the thing we need to return
     return status1 and status2, mpd_no_list_file
 
@@ -113,12 +113,8 @@ def handle_video_request(client_messages):
     # find appropriate bitrate
     actual_bitrate = choose_bitrate()
     # replace client's request with the appropriate bitrate
-    print("???", requested_bitrate, actual_bitrate)
     client_messages = client_messages.replace(str(requested_bitrate).encode(), str(actual_bitrate).encode())
-    print("!!!", client_messages)
-    # find the sequence number the client is requesting
-    seq_loc = decode_message.find('/BigBuckBunny_6s')
-    return client_messages, actual_bitrate, decode_message[seq_loc:seq_loc+20]
+    return client_messages, actual_bitrate
 
 
 def extract_content_length(temp_header):
@@ -136,7 +132,7 @@ def extract_content_length(temp_header):
 
 # receive from a socket
 # if the message is empty, there is a disconnection
-def receive_from_end(endSocket, load):
+def receive_from_end(endSocket):
     temp_message = endSocket.recv(2048)
     if b'Content-Length' not in temp_message:
         return (True, temp_message)
@@ -175,17 +171,19 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 send_to_end(clientSocket, mpd_no_list_file)
                 print("DEALED WITH MPD")
             elif b'bps/BigBuckBunny_6s' in client_messages:
-                client_messages, actual_bitrate, seq_num = handle_video_request(client_messages)
-                status, response = time_and_send(serverSocket, client_messages, actual_bitrate * 10, True)
+                client_messages, actual_bitrate = handle_video_request(client_messages)
+                print("FINISHED MODIFYING REQUEST")
+                status, response = time_and_send(serverSocket, client_messages, True)
                 # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
                 actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+[.]', client_messages.decode())
                 log_list[-1] += (" " + str(actual_bitrate) + " " + str(web_server_ip) + " " + str(actual_chunk_name))
                 print(log_list[-1])
                 if not status:
                     break
+                print(len(response))
                 send_to_end(clientSocket, response)
                 print("--------------------------------")
-                print("Video Response:", actual_bitrate, seq_num, response[:500])
+                print("Video Response:", actual_bitrate, response[:500])
             else:
                 # send to server
                 send_to_end(serverSocket, client_messages)
@@ -211,6 +209,6 @@ if __name__ == '__main__':
     recvSocket.listen(max_num_connections) # TODO: what is the maximum concurrent connections allowed?
     # Establish a connection with clients
     # allow multiple clients to connect concurrently as long as the total number of clents are less than maximum
-    for i in range(max_num_connections):
+    for i in range(1):
         worker = Thread(target=connect, args=(recvSocket, fake_ip, web_server_ip))
         worker.start()
