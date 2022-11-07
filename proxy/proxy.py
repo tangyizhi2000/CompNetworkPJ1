@@ -108,7 +108,13 @@ def handle_video_request(client_messages):
     actual_bitrate = choose_bitrate(int(requested_bitrate))
     # replace client's request with the appropriate bitrate
     client_messages.replace(requested_bitrate.encode(), str(actual_bitrate).encode())
-    return client_messages, actual_bitrate
+    # find the sequence number the client is requesting
+    sequence_num = ""
+    seq_loc = decode_message.find('/BigBuckBunny_6s')
+    for i in range(seq_loc, seq_loc + len('/BigBuckBunny_6s')):
+        if decode_message[i].isnumeric():
+            sequence_num += decode_message[i]
+    return client_messages, actual_bitrate, int(sequence_num)
 
 # receive from a socket
 # detect \n as the end of the message
@@ -139,10 +145,10 @@ def connect(recvSocket, fake_ip, web_server_ip):
                     break
                 send_to_end(clientSocket, mpd_no_list_file)
             elif b'bps/BigBuckBunny_6s' in client_messages:
-                client_messages, bitrate = handle_video_request(client_messages)
+                client_messages, bitrate, seq_num = handle_video_request(client_messages)
                 status, response = time_and_send(serverSocket, client_messages, bitrate * 10)
                 print("--------------------------------")
-                print("Video Response:", bitrate)
+                print("Video Response:", bitrate, seq_num)
                 if not status:
                     break
                 send_to_end(clientSocket, response)
