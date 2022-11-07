@@ -49,9 +49,9 @@ def parse_mpd():
         bitrate_list.append(cur_bitrate)
         bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))    
 
-def choose_bitrate(requested_bitrate):
+def choose_bitrate():
     for bitrate in reversed(bitrate_list):
-        if bitrate < requested_bitrate / 1.5:
+        if bitrate < T_current / 1.5:
             return bitrate
 
 '''
@@ -111,7 +111,7 @@ def handle_video_request(client_messages):
         else:
             break
     # find appropriate bitrate
-    actual_bitrate = choose_bitrate(int(requested_bitrate))
+    actual_bitrate = choose_bitrate()
     # replace client's request with the appropriate bitrate
     client_messages.replace(requested_bitrate.encode(), str(actual_bitrate).encode())
     print("!!!", client_messages)
