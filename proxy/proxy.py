@@ -120,9 +120,11 @@ def handle_video_request(client_messages):
 # detect \n as the end of the message
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket, load):
-    all_messages = endSocket.recv(load)
-    if all_messages == b"":
-        return (False, "")
+    all_messages = b""
+    tmp_message = None
+    while tmp_message != b"":
+        tmp_message = endSocket.recv(2048)
+        all_messages = all_messages + tmp_message
     return (True, all_messages)
 
 def connect(recvSocket, fake_ip, web_server_ip):
@@ -148,7 +150,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 client_messages, actual_bitrate, seq_num = handle_video_request(client_messages)
                 status, response = time_and_send(serverSocket, client_messages, actual_bitrate * 10, True)
                 # logging
-                actual_chunk_name = re.search('*/bunny_*bps/BigBuckBunny_6s*m4s', client_messages.decode())
+                actual_chunk_name = re.search('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+[.][m][4][s]', client_messages.decode())
                 log_list[-1] += (" " + str(actual_bitrate) + " " + str(web_server_ip) + " " + actual_chunk_name)
                 print(log_list[-1])
                 if not status:
