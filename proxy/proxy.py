@@ -29,8 +29,6 @@ def calculate_throughput(size, tf, ts):
     T = float((size - sys.getsizeof(b'')) / (tf - ts))
     T_current = alpha * T - (1 - alpha) * T_current
     T_current_list.append(T_current)
-    print("T_current now changes to", T_current, alpha)
-    print("!!!!", T_current_list)
 
 # send a message to the target socket
 def send_to_end(endSocket, message):
@@ -46,6 +44,11 @@ def parse_mpd():
                 cur_bitrate = cur_bitrate * 10 + int(mpd_xml[i])
         bitrate_list.append(cur_bitrate)
         bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))    
+
+def choose_bitrate(requested_bitrate):
+    for bitrate in reversed(bitrate_list):
+        if bitrate < requested_bitrate / 1.5:
+            return bitrate
 
 '''
 BigBuckBunny_6s.mpd
@@ -82,7 +85,7 @@ BigBuckBunny_6s_nolist.mpd
 '''
 def handle_mpd(client_messages, serverSocket):
     # request a copy of mpd.xml
-    status1, mpd_file= time_and_send(serverSocket, client_messages, 2048)
+    status1, mpd_file = time_and_send(serverSocket, client_messages, 2048)
     global mpd_xml
     mpd_xml = mpd_file.decode()
     parse_mpd()
@@ -91,6 +94,21 @@ def handle_mpd(client_messages, serverSocket):
     status2, mpd_no_list_file = time_and_send(serverSocket, mpd_nolist_request, 2048)
     # status is whether server disconnects; mpd_no_list_file is the thing we need to return
     return status1 and status2, mpd_no_list_file
+
+def handle_video_request(client_messages):
+    # parse the client request, and request for appropriate video according to throughput
+    decode_message = client_messages.decode()
+    # find the client requested bitrate
+    info_loc = decode_message.find(b'/bunny_')
+    requested_bitrate = ""
+    for i in range(info_loc, info_loc + 20):
+        if decode_message[i].isnumeric():
+            requested_bitrate += decode_message[i]
+    # find appropriate bitrate
+    actual_bitrate = choose_bitrate(int(requested_bitrate))
+    # replace client's request with the appropriate bitrate
+    client_messages.replace(requested_bitrate.endcode(), str(actual_bitrate).encode())
+    return client_messages, actual_bitrate
 
 # receive from a socket
 # detect \n as the end of the message
@@ -123,7 +141,12 @@ def connect(recvSocket, fake_ip, web_server_ip):
                     break
                 send_to_end(clientSocket, mpd_no_list_file)
             elif b'bps/BigBuckBunny_6s' in client_messages:
-                print('BigBuckBunny_6s', client_messages)
+                client_messages, bitrate = handle_video_request(client_messages)
+                status, response = time_and_send(serverSocket, client_messages, bitrate * 10)
+                print("Video Response:", bitrate, response)
+                if not status:
+                    break
+                send_to_end(clientSocket, response)
             else:
                 print("client message:", client_messages, ts)
                 # send to server
