@@ -142,11 +142,13 @@ def receive_from_end(endSocket):
         end_of_header = temp_message.find(b'\r\n\r\n') + len(b'\r\n\r\n')
         temp_header = temp_message[:end_of_header].decode('utf-8', 'ignore')
         content_length = extract_content_length(temp_header) - (sys.getsizeof(temp_message[end_of_header:]) - sys.getsizeof(b''))
+        print("!!!", content_length, temp_header)
         while content_length > 0:
             temp_message = endSocket.recv(2048)
             end_of_header = temp_message.find(b'\r\n\r\n') + len(b'\r\n\r\n')
             temp_header = temp_message[:end_of_header].decode('utf-8', 'ignore')
             content_length = content_length - (sys.getsizeof(temp_message[end_of_header:]) - sys.getsizeof(b''))
+            print("!!!", content_length)
             all_message = all_message + temp_message[end_of_header:]
         return (True, all_message)
 
