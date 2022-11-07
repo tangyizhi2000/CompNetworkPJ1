@@ -27,8 +27,6 @@ def time_and_send(serverSocket, client_message, load, video_chunk):
 
 def calculate_throughput(size, tf, ts):
     global T_current, alpha, T_current_list, log_list
-    if T_current == -1 and len(bitrate_list) > 1:
-        T_current = bitrate_list[0]
     T = float((size - sys.getsizeof(b'')) / (tf - ts))
     T_current = alpha * T - (1 - alpha) * T_current
     T_current_list.append(T_current)
@@ -50,7 +48,8 @@ def parse_mpd():
         bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))    
 
 def choose_bitrate():
-    print("HELLO", T_current)
+    if T_current == -1:
+        return bitrate_list[0]
     for bitrate in reversed(bitrate_list):
         if bitrate < T_current / 1.5:
             return bitrate
