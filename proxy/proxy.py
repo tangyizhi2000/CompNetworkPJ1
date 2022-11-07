@@ -130,8 +130,6 @@ def connect(recvSocket, fake_ip, web_server_ip):
         while True:
             # receive from client
             status, client_messages = receive_from_end(clientSocket, 2048)
-            # ts is used to calculate the bandwidth
-            ts = time.time()
             if not status:
                 break
             # MPD file request, save the MPD file
@@ -143,19 +141,25 @@ def connect(recvSocket, fake_ip, web_server_ip):
             elif b'bps/BigBuckBunny_6s' in client_messages:
                 client_messages, bitrate = handle_video_request(client_messages)
                 status, response = time_and_send(serverSocket, client_messages, bitrate * 10)
-                print("Video Response:", bitrate, response)
+                print("--------------------------------")
+                print("Video Response:", bitrate)
+                print("--------------------------------")
                 if not status:
                     break
                 send_to_end(clientSocket, response)
             else:
-                print("client message:", client_messages, ts)
+                print("--------------------------------")
+                print("client message:", client_messages)
+                print("--------------------------------")
                 # send to server
                 send_to_end(serverSocket, client_messages)
                 # receive from server
                 status, server_response = receive_from_end(serverSocket, 10067431)
                 if not status:
                     break
+                print("--------------------------------")
                 print("server response:", server_response)
+                print("--------------------------------")
                 # send back to client
                 send_to_end(clientSocket, server_response)
                 
