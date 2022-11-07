@@ -127,7 +127,7 @@ def receive_from_end(endSocket, load):
         content_length = 0
         length_loc = temp_message.find(b'Content-Length')
         for i in range(length_loc, length_loc + 10):
-            if temp_message[i].isnumeric():
+            if temp_message[i].decode().isnumeric():
                 content_length = content_length * 10 + int(temp_message[i])
             else:
                 break
