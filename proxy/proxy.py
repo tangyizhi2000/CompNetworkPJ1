@@ -126,7 +126,7 @@ def extract_content_length(temp_header):
         elif temp_header[i] != ' ':
             break
     print(content_length)
-    content_length = int(content_length)
+    #content_length = int(content_length)
     print("content length", content_length)
     return content_length
 
