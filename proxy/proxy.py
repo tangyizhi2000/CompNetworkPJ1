@@ -119,12 +119,12 @@ def handle_video_request(client_messages):
 
 def extract_content_length(temp_header):
     content_length = ""
-    length_loc = temp_header.find('Content-Length')
-    for i in range(length_loc + len('Content-Length'), len(temp_header)):
+    length_loc = temp_header.find('Content-Length') + len('Content-Length')
+    for i in range(length_loc + 2, length_loc + 7):
+        print('!', temp_header[i])
         if temp_header[i] == ' ':
             continue
         if temp_header[i] >= '0' and temp_header[i] <= '9':
-            print('!', temp_header[i])
             content_length += temp_header[i]
         else:
             break
