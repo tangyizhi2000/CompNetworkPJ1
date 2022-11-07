@@ -23,7 +23,7 @@ def time_and_send(serverSocket, client_message, load):
 
 def calculate_throughput(size, tf, ts):
     global T_current, alpha
-    T = (size - sys.getsizeof(b'')) / (tf - ts)
+    T = float((size - sys.getsizeof(b'')) / (tf - ts))
     T_current = alpha * T - (1 - alpha) * T_current
 
 # send a message to the target socket
