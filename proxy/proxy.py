@@ -114,7 +114,7 @@ def handle_video_request(client_messages):
     actual_bitrate = choose_bitrate()
     # replace client's request with the appropriate bitrate
     print("???", requested_bitrate, actual_bitrate)
-    client_messages.replace(str(requested_bitrate).encode(), str(actual_bitrate).encode())
+    client_messages = client_messages.replace(str(requested_bitrate).encode(), str(actual_bitrate).encode())
     print("!!!", client_messages)
     # find the sequence number the client is requesting
     seq_loc = decode_message.find('/BigBuckBunny_6s')
