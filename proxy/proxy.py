@@ -116,26 +116,35 @@ def handle_video_request(client_messages):
     seq_loc = decode_message.find('/BigBuckBunny_6s')
     return client_messages, actual_bitrate, decode_message[seq_loc:seq_loc+20]
 
+
+def extract_content_length(temp_header):
+    content_length = ""
+    length_loc = temp_header.find('Content-Length')
+    for i in range(length_loc, length_loc + 25):
+        if temp_header[i] >= '0' and temp_header[i] <= '9':
+            content_length += temp_header[i]
+    content_length = int(content_length)
+    return content_length
+
 # receive from a socket
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket, load):
     temp_message = endSocket.recv(524280)
-    all_message = temp_message
-    while b'Content-Length' in temp_message:
-        # how many bits left we need to receive
-        content_length = ""
-        temp_header = temp_message[:temp_message.find(b'\r\n\r\n')].decode()
-        length_loc = temp_header.find('Content-Length')
-        for i in range(length_loc, length_loc + 25):
-            if temp_header[i] >= '0' and temp_header[i] <= '9':
-                content_length += temp_header[i]
-        print(temp_message[temp_message.find(b'Content-Length'):temp_message.find(b'Content-Length')+25], content_length)
-        content_length = int(content_length)
-        temp_message = endSocket.recv(content_length)
-        print("FIRST")
-        all_message = all_message + temp_message
-    print("Returned")
-    return (True, all_message)
+    if b'Content-Length' not in temp_message:
+        return (True, temp_message)
+    else:
+        all_message = temp_message
+        # what is header v.s. what is content
+        end_of_header = temp_message.find(b'\r\n\r\n') + len(b'\r\n\r\n')
+        temp_header = temp_message[:end_of_header].decode()
+        content_length = extract_content_length(temp_header)
+        while content_length > sys.getsizeof(temp_message[end_of_header:]) - sys.getsizeof(b''):
+            temp_message = endSocket.recv(524280)
+            end_of_header = temp_message.find(b'\r\n\r\n') + len(b'\r\n\r\n')
+            temp_header = temp_message[:end_of_header].decode()
+            content_length = extract_content_length(temp_header)
+            all_message = all_message + temp_message[end_of_header:]
+        return (True, all_message)
 
 def connect(recvSocket, fake_ip, web_server_ip):
     while True:
