@@ -120,8 +120,13 @@ def handle_video_request(client_messages):
 # detect \n as the end of the message
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket, load):
-    first_message = endSocket.recv(524280)
-    return (True, first_message)
+    temp_message = endSocket.recv(524280)
+    all_message = temp_message
+    while b'Content-Length' in temp_message:
+        temp_message = endSocket.recv(524280)
+        temp_message[temp_message.find(b'\r\n\r\n'):]
+        all_message = all_message + temp_message
+    return (True, all_message)
 
 def connect(recvSocket, fake_ip, web_server_ip):
     while True:
