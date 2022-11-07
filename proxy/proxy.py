@@ -107,7 +107,7 @@ def handle_video_request(client_messages):
     # find appropriate bitrate
     actual_bitrate = choose_bitrate(int(requested_bitrate))
     # replace client's request with the appropriate bitrate
-    client_messages.replace(requested_bitrate.endcode(), str(actual_bitrate).encode())
+    client_messages.replace(requested_bitrate.encode(), str(actual_bitrate).encode())
     return client_messages, actual_bitrate
 
 # receive from a socket
