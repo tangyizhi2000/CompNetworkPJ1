@@ -112,6 +112,7 @@ def handle_video_request(client_messages):
     actual_bitrate = choose_bitrate(int(requested_bitrate))
     # replace client's request with the appropriate bitrate
     client_messages.replace(requested_bitrate.encode(), str(actual_bitrate).encode())
+    print(client_messages)
     # find the sequence number the client is requesting
     seq_loc = decode_message.find('/BigBuckBunny_6s')
     return client_messages, actual_bitrate, decode_message[seq_loc:seq_loc+20]
@@ -173,7 +174,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
             elif b'bps/BigBuckBunny_6s' in client_messages:
                 client_messages, actual_bitrate, seq_num = handle_video_request(client_messages)
                 status, response = time_and_send(serverSocket, client_messages, actual_bitrate * 10, True)
-                # logging
+                # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
                 actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+[.]', client_messages.decode())
                 log_list[-1] += (" " + str(actual_bitrate) + " " + str(web_server_ip) + " " + str(actual_chunk_name))
                 print(log_list[-1])
