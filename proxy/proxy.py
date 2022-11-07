@@ -33,14 +33,14 @@ def send_to_end(endSocket, message):
 
 def parse_mpd():
     global bitrate_list
-    bitrate_loc = mpd_xml.find('bandwidth=\"', 0, len(bitrate_loc))
+    bitrate_loc = mpd_xml.find('bandwidth=\"', 0, len(mpd_xml))
     while bitrate_loc != -1:
         cur_bitrate = 0
         for i in range(bitrate_loc, bitrate_loc + 20):
             if mpd_xml[i].isnumeric():
                 cur_bitrate = cur_bitrate * 10 + (mpd_xml[i] - '0')
         bitrate_list.append(cur_bitrate)
-        bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(bitrate_loc))
+        bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))
     print("!!!!!!!", bitrate_list)
     
 
