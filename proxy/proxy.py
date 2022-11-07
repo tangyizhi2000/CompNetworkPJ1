@@ -50,10 +50,9 @@ def parse_mpd():
         bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))    
 
 def choose_bitrate():
-    print("HELLO")
+    print("HELLO", T_current)
     for bitrate in reversed(bitrate_list):
         if bitrate < T_current / 1.5:
-            print("T_current", T_current, bitrate)
             return bitrate
 
 '''
