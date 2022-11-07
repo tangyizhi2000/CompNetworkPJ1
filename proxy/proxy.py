@@ -24,6 +24,7 @@ def time_and_send(serverSocket, client_message, load):
 def calculate_throughput(size, tf, ts):
     global T_current, alpha
     T = float((size - sys.getsizeof(b'')) / (tf - ts))
+    print(type(T_current), type(T), type(alpha))
     T_current = alpha * T - (1 - alpha) * T_current
 
 # send a message to the target socket
@@ -131,7 +132,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
 
 if __name__ == '__main__':
     # commandline ./proxy <log> <alpha> <listen-port> <fake-ip> <web-server-ip>
-    file_path, alpha, listen_port, fake_ip, web_server_ip = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4], sys.argv[5]
+    file_path, alpha, listen_port, fake_ip, web_server_ip = sys.argv[1], float(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5]
     recvSocket = socket(AF_INET,SOCK_STREAM) ## create socket listening for requests from client
     recvSocket.bind(('', listen_port)) # Reachable by any address on port listen_port
     recvSocket.listen(max_num_connections) # TODO: what is the maximum concurrent connections allowed?
