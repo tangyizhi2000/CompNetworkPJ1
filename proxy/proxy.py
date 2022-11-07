@@ -7,6 +7,14 @@ max_num_connections = 10
 total_num_connections = 0
 mpd_xml = ""
 
+# record time and send message
+def time_and_send(serverSocket, client_message, load):
+    ts = time.time()
+    send_to_end(serverSocket, client_message)
+    status, response = receive_from_end(serverSocket, load)
+    tf = time.time()
+    return status, response, ts, tf
+
 # send a message to the target socket
 def send_to_end(endSocket, message):
     endSocket.send(message)
@@ -31,15 +39,13 @@ def send_to_end(endSocket, message):
 '''
 def handle_mpd(client_messages, serverSocket):
     # request a copy of mpd.xml
-    send_to_end(serverSocket, client_messages)
-    status1, mpd_file = receive_from_end(serverSocket, 2048)
+    status1, mpd_file, ts, tf = time_and_send(serverSocket, client_messages, 2048)
+    global mpd_xml
     mpd_xml = mpd_file.decode()
-    print(mpd_xml)
     # replace 'BigBuckBunny_6s.mpd' with 'BigBuckBunny_6s_nolist.mpd' and request server a copy of it
     mpd_nolist_request = client_messages.replace(b'BigBuckBunny_6s.mpd', b'BigBuckBunny_6s_nolist.mpd')
-    send_to_end(serverSocket, mpd_nolist_request)
-    status2, mpd_no_list_file = receive_from_end(serverSocket, 2048)
-    print(mpd_no_list_file)
+    status2, mpd_no_list_file, ts, tf = time_and_send(serverSocket, mpd_nolist_request, 2048)
+    print(mpd_no_list_file.decode())
     # status is whether server disconnects; mpd_no_list_file is the thing we need to return
     return status1 and status2, mpd_no_list_file
 
@@ -56,8 +62,6 @@ def connect(recvSocket, fake_ip, web_server_ip):
     while True:
         # Receive a connection from client
         clientSocket, addr = recvSocket.accept()
-        # ts is used to calculate the bandwidth
-        ts = time.time()
         # Establish a connection with a server
         serverSocket = socket(AF_INET, SOCK_STREAM)
         serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
@@ -65,6 +69,8 @@ def connect(recvSocket, fake_ip, web_server_ip):
         while True:
             # receive from client
             status, client_messages = receive_from_end(clientSocket, 2048)
+            # ts is used to calculate the bandwidth
+            ts = time.time()
             if not status:
                 break
             # MPD file request, save the MPD file
@@ -73,7 +79,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 if not status:
                     break
                 send_to_end(clientSocket, mpd_no_list_file)
-            if b'BigBuckBunny_6s' in client_messages:
+            elif b'bps/BigBuckBunny_6s' in client_messages:
                 print('BigBuckBunny_6s', client_messages)
             else:
                 print("client message:", client_messages, ts)
