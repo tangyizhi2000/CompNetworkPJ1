@@ -114,7 +114,7 @@ def handle_video_request(client_messages):
     actual_bitrate = choose_bitrate()
     # replace client's request with the appropriate bitrate
     print("???", requested_bitrate, actual_bitrate)
-    client_messages.replace(requested_bitrate.encode(), str(actual_bitrate).encode())
+    client_messages.replace(str(requested_bitrate).encode(), str(actual_bitrate).encode())
     print("!!!", client_messages)
     # find the sequence number the client is requesting
     seq_loc = decode_message.find('/BigBuckBunny_6s')
@@ -184,8 +184,6 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 if not status:
                     break
                 send_to_end(clientSocket, response)
-                print("--------------------------------")
-                print("CLIENT", client_messages)
                 print("--------------------------------")
                 print("Video Response:", actual_bitrate, seq_num, response[:500])
             else:
