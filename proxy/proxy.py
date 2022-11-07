@@ -128,7 +128,6 @@ def extract_content_length(temp_header):
         else:
             break
     content_length = int(content_length)
-    print("content length", content_length, temp_header)
     return content_length
 
 # receive from a socket
@@ -170,31 +169,31 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 if not status:
                     break
                 send_to_end(clientSocket, mpd_no_list_file)
+                print("DEALED WITH MPD")
             elif b'bps/BigBuckBunny_6s' in client_messages:
                 client_messages, actual_bitrate, seq_num = handle_video_request(client_messages)
                 status, response = time_and_send(serverSocket, client_messages, actual_bitrate * 10, True)
                 # logging
-                actual_chunk_name = re.search('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+[.][m][4][s]', client_messages.decode())
+                actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+[.]', client_messages.decode())
                 log_list[-1] += (" " + str(actual_bitrate) + " " + str(web_server_ip) + " " + str(actual_chunk_name))
                 print(log_list[-1])
                 if not status:
                     break
                 send_to_end(clientSocket, response)
                 print("--------------------------------")
+                print("CLIENT", client_messages)
+                print("--------------------------------")
                 print("Video Response:", actual_bitrate, seq_num, response[:500])
             else:
-                print("--------------------------------")
-                print("client message:", client_messages)
                 # send to server
                 send_to_end(serverSocket, client_messages)
                 # receive from server
                 status, server_response = receive_from_end(serverSocket, 10067431)
                 if not status:
                     break
-                print("--------------------------------")
-                print("server response:", server_response[:1000])
                 # send back to client
                 send_to_end(clientSocket, server_response)
+                print("OTHERS")
                 
         # close the relevant connections
         clientSocket.close()
