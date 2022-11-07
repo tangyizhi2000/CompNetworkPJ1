@@ -38,7 +38,7 @@ def parse_mpd():
         cur_bitrate = 0
         for i in range(bitrate_loc, bitrate_loc + 20):
             if mpd_xml[i].isnumeric():
-                cur_bitrate = cur_bitrate * 10 + (mpd_xml[i] - '0')
+                cur_bitrate = cur_bitrate * 10 + int(mpd_xml[i])
         bitrate_list.append(cur_bitrate)
         bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))
     print("!!!!!!!", bitrate_list)
