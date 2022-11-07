@@ -139,7 +139,7 @@ def receive_from_end(endSocket, load):
         temp_header = temp_message[:end_of_header].decode('utf-8', 'ignore')
         print(temp_message[:end_of_header])
         content_length = extract_content_length(temp_header)
-        while content_length > sys.getsizeof(temp_message[end_of_header:]) - sys.getsizeof(b''):
+        while b'Content-Length' in temp_message and content_length > sys.getsizeof(temp_message[end_of_header:]) - sys.getsizeof(b''):
             temp_message = endSocket.recv(524280)
             end_of_header = temp_message.find(b'\r\n\r\n') + len(b'\r\n\r\n')
             temp_header = temp_message[:end_of_header].decode('utf-8', 'ignore')
