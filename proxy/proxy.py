@@ -143,11 +143,11 @@ def connect(recvSocket, fake_ip, web_server_ip):
             elif b'bps/BigBuckBunny_6s' in client_messages:
                 client_messages, bitrate, seq_num = handle_video_request(client_messages)
                 status, response = time_and_send(serverSocket, client_messages, bitrate * 10)
-                print("--------------------------------")
-                print("Video Response:", bitrate, seq_num)
                 if not status:
                     break
                 send_to_end(clientSocket, response)
+                print("--------------------------------")
+                print("Video Response:", bitrate, seq_num, response[:100])
             else:
                 print("--------------------------------")
                 print("client message:", client_messages)
