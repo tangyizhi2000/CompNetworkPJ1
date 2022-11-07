@@ -130,6 +130,7 @@ def receive_from_end(endSocket, load):
             if temp_header[i] >= '0' and temp_header[i] <= '9':
                 content_length += temp_header[i]
         print(temp_message[temp_message.find(b'Content-Length'):temp_message.find(b'Content-Length')+25], content_length)
+        content_length = int(content_length)
         temp_message = endSocket.recv(content_length)
         print("FIRST")
         all_message = all_message + temp_message
