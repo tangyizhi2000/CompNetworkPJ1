@@ -2,6 +2,7 @@ from threading import Thread
 from socket import *
 import sys
 import time
+import re
 
 max_num_connections = 10
 total_num_connections = 0
@@ -146,7 +147,9 @@ def connect(recvSocket, fake_ip, web_server_ip):
             elif b'bps/BigBuckBunny_6s' in client_messages:
                 client_messages, actual_bitrate, seq_num = handle_video_request(client_messages)
                 status, response = time_and_send(serverSocket, client_messages, actual_bitrate * 10, True)
-                log_list[-1] += (" " + str(actual_bitrate) + " " + str(web_server_ip))
+                # logging
+                actual_chunk_name = re.search('*/bunny_*bps/BigBuckBunny_6s*m4s', client_messages.decode())
+                log_list[-1] += (" " + str(actual_bitrate) + " " + str(web_server_ip) + " " + actual_chunk_name)
                 print(log_list[-1])
                 if not status:
                     break
