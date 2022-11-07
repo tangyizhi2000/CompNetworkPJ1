@@ -135,8 +135,9 @@ def receive_from_end(endSocket, load):
     else:
         all_message = temp_message
         # what is header v.s. what is content
-        end_of_header = temp_message.find(b'\r\n\r\n') + len(b'\r\n\r\n')
+        end_of_header = temp_message.find(b'\r\n\r\n') + len(b'\r\n\r\n') - 1
         temp_header = temp_message[:end_of_header].decode()
+        print(temp_message[:end_of_header])
         content_length = extract_content_length(temp_header)
         while content_length > sys.getsizeof(temp_message[end_of_header:]) - sys.getsizeof(b''):
             temp_message = endSocket.recv(524280)
