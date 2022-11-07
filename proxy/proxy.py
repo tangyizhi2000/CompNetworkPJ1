@@ -123,7 +123,7 @@ def extract_content_length(temp_header):
     for i in range(length_loc + 2, min(length_loc + 10, len(temp_header))):
         if temp_header[i] == ' ':
             continue
-        if temp_header[i] >= '0' and temp_header[i] <= '9':
+        if temp_header[i].isnumeric():
             content_length += temp_header[i]
         else:
             break
