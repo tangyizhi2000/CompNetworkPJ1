@@ -111,7 +111,7 @@ def handle_video_request(client_messages):
     # find the sequence number the client is requesting
     sequence_num = ""
     seq_loc = decode_message.find('/BigBuckBunny_6s')
-    for i in range(seq_loc, seq_loc + len('/BigBuckBunny_6s')):
+    for i in range(seq_loc + len('/BigBuckBunny_6s'), seq_loc + len('/BigBuckBunny_6s') + 5):
         if decode_message[i].isnumeric():
             sequence_num += decode_message[i]
     return client_messages, actual_bitrate, int(sequence_num)
