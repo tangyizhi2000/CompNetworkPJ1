@@ -120,12 +120,11 @@ def handle_video_request(client_messages):
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket, load):
     temp_message = endSocket.recv(524280)
-    return (True, temp_message)
     print("BEAUTIFUL")
     all_message = temp_message
     while b'Content-Length' in temp_message:
         temp_message = endSocket.recv(524280)
-        temp_message[temp_message.find(b'\r\n\r\n'):]
+        print(temp_message[temp_message.find(b'\r\n\r\n'):2000])
         all_message = all_message + temp_message
     print("Returned")
     return (True, all_message)
