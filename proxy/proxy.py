@@ -143,14 +143,12 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 status, response = time_and_send(serverSocket, client_messages, bitrate * 10)
                 print("--------------------------------")
                 print("Video Response:", bitrate)
-                print("--------------------------------")
                 if not status:
                     break
                 send_to_end(clientSocket, response)
             else:
                 print("--------------------------------")
                 print("client message:", client_messages)
-                print("--------------------------------")
                 # send to server
                 send_to_end(serverSocket, client_messages)
                 # receive from server
@@ -159,7 +157,6 @@ def connect(recvSocket, fake_ip, web_server_ip):
                     break
                 print("--------------------------------")
                 print("server response:", server_response)
-                print("--------------------------------")
                 # send back to client
                 send_to_end(clientSocket, server_response)
                 
