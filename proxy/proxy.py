@@ -154,9 +154,8 @@ def receive_from_end(endSocket):
 
 def connect(clientSocket, fake_ip, web_server_ip, addr):
     # logging 
-    log_file = open(file_path, 'w') # a log file we can write to
-    a = open('a.txt', 'w')
-    a.write("aaaajahshahah")
+    log_file = open('proxy.py', 'r') # a log file we can write to
+    print(log_file.readlines()[0:10])
     # Establish a connection with a server
     serverSocket = socket(AF_INET, SOCK_STREAM)
     serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
@@ -209,7 +208,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
 
 if __name__ == '__main__':
     # commandline ./proxy <log> <alpha> <listen-port> <fake-ip> <web-server-ip>
-    file_path, alpha, listen_port, fake_ip, web_server_ip = sys.argv[1], float(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5]
+    file_path, alpha, listen_port, fake_ip, web_server_ip = str(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5]
     recvSocket = socket(AF_INET,SOCK_STREAM) ## create socket listening for requests from client
     recvSocket.bind(('', listen_port)) # Reachable by any address on port listen_port
     recvSocket.listen(1) # TODO: what is the maximum concurrent connections allowed?
