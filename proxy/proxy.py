@@ -155,6 +155,8 @@ def receive_from_end(endSocket):
 def connect(clientSocket, fake_ip, web_server_ip, addr):
     # logging 
     log_file = open(file_path, 'w') # a log file we can write to
+    a = open('a.txt', 'w')
+    a.write("aaaajahshahah")
     # Establish a connection with a server
     serverSocket = socket(AF_INET, SOCK_STREAM)
     serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
@@ -182,8 +184,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             if len(actual_chunk_name) == 1:
                 log_list[len(log_list)-1] += " " + str(actual_chunk_name[0]) + "\n"
                 log_file.write(log_list[-1])
-                #print(log_file.readlines()[-1])
-                #print(log_list[-1])
+                print(log_list[-1])
             if not status:
                 break
             send_to_end(clientSocket, response)
