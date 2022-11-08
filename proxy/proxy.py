@@ -181,7 +181,8 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
                 log_list[len(log_list)-1] += " " + str(actual_chunk_name[0]) + "\n"
                 global log_file
                 log_file.write(log_list[-1])
-                print(log_list[-1])
+                print(log_file.readlines()[-1])
+                #print(log_list[-1])
             if not status:
                 break
             send_to_end(clientSocket, response)
