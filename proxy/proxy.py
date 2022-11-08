@@ -141,7 +141,6 @@ def receive_from_end(endSocket):
         # what is header v.s. what is content
         end_of_header = temp_message.find(b'\r\n\r\n') + len(b'\r\n\r\n')
         temp_header = temp_message[:end_of_header].decode('utf-8', 'ignore')
-        print(temp_message[:5000], len(temp_message[:5000]))
         content_length = extract_content_length(temp_header) - (len(temp_message) - len(temp_message[:end_of_header]))
         print("!!!", content_length, temp_header)
         content_length_cp = content_length
