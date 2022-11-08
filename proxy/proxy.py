@@ -48,12 +48,10 @@ def parse_mpd():
         bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))    
 
 def choose_bitrate():
-    if T_current == -1:
-        return bitrate_list[0]
     for bitrate in reversed(bitrate_list):
         if bitrate < T_current / 1.5:
             return bitrate
-
+    return bitrate_list[0]
 '''
 BigBuckBunny_6s.mpd
 <?xml version="1.0" encoding="UTF-8"?>
@@ -176,9 +174,10 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 print("FINISHED MODIFYING REQUEST")
                 status, response = time_and_send(serverSocket, client_messages, True)
                 # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
-                actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+([.][m][p][4]|[.][m][4][a])', client_messages.decode())
-                log_list[-1] += (" " + str(actual_bitrate) + " " + str(web_server_ip) + " " + str(actual_chunk_name))
-                print(log_list[-1])
+                actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+[.]m4a', client_messages.decode())
+                if len(actual_chunk_name) > 1:
+                    log_list[-1] += (" " + str(actual_bitrate) + " " + str(web_server_ip) + " " + str(actual_chunk_name[0]))
+                    print(log_list[-1])
                 if not status:
                     break
                 send_to_end(clientSocket, response)
