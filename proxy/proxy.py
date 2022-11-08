@@ -144,7 +144,6 @@ def receive_from_end(endSocket):
         end_of_header = temp_message.find(b'\r\n\r\n') + len(b'\r\n\r\n')
         temp_header = temp_message[:end_of_header].decode('utf-8', 'ignore')
         content_length = extract_content_length(temp_header) - (len(temp_message) - len(temp_message[:end_of_header]))
-        print("!!!", content_length, temp_header)
         content_length_cp = content_length
         while content_length > 0:
             temp_message = endSocket.recv(content_length_cp)
@@ -177,15 +176,12 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 print("FINISHED MODIFYING REQUEST")
                 status, response = time_and_send(serverSocket, client_messages, True)
                 # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
-                actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+[.]', client_messages.decode())
+                actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+([.][m][p][4]|[.][m][4][a])', client_messages.decode())
                 log_list[-1] += (" " + str(actual_bitrate) + " " + str(web_server_ip) + " " + str(actual_chunk_name))
                 print(log_list[-1])
                 if not status:
                     break
-                print(len(response))
                 send_to_end(clientSocket, response)
-                print("--------------------------------")
-                print("Video Response:", actual_bitrate, response[:500])
             else:
                 # send to server
                 print("OTHERS", client_messages[:200])
