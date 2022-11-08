@@ -134,7 +134,9 @@ def extract_content_length(temp_header):
 # if the message is empty, there is a disconnection
 def receive_from_end(endSocket):
     temp_message = endSocket.recv(2048)
-    if b'Content-Length' not in temp_message:
+    if temp_message == b'':
+        return (False, temp_message)
+    elif b'Content-Length' not in temp_message:
         return (True, temp_message)
     else:
         all_message = temp_message
