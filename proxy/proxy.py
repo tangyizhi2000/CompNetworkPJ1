@@ -178,7 +178,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+\.m4s', client_messages.decode())
                 global log_list
                 print("???", len(log_list))
-                log_list[-1] += (" " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) + " " + str(actual_chunk_name[0]))
+                log_list[-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) + " " + str(actual_chunk_name[0])
                 print(log_list[-1])
                 if not status:
                     break
