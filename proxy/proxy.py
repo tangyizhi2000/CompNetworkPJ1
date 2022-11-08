@@ -31,7 +31,6 @@ def calculate_throughput(size, tf, ts):
     T_current = alpha * T - (1 - alpha) * T_current
     T_current_list.append(T_current)
     log_list.append(str(time.time()) + " " + str(tf - ts) + " " + str(T) + " " + str(T_current))
-    print("!!!!", len(log_list))
 
 # send a message to the target socket
 def send_to_end(endSocket, message):
@@ -178,7 +177,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+\.m4s', client_messages.decode())
                 global log_list
                 print("???", len(log_list), log_list[0], log_list[-1])
-                log_list[-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) + " " + str(actual_chunk_name[0])
+                log_list[len(log_list)-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) + " " + str(actual_chunk_name[0])
                 print(log_list[-1])
                 if not status:
                     break
