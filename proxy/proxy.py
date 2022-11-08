@@ -195,9 +195,10 @@ def connect(clientSocket, fake_ip, web_server_ip):
             # send back to client
             send_to_end(clientSocket, server_response)
 
-        # close the relevant connections
-        clientSocket.close()
-        serverSocket.close()
+    # close the relevant connections
+    clientSocket.close()
+    serverSocket.close()
+        
 
 
 if __name__ == '__main__':
@@ -206,7 +207,7 @@ if __name__ == '__main__':
     log_file = open(file_path, 'w') # a log file we can write to
     recvSocket = socket(AF_INET,SOCK_STREAM) ## create socket listening for requests from client
     recvSocket.bind(('', listen_port)) # Reachable by any address on port listen_port
-    recvSocket.listen(2) # TODO: what is the maximum concurrent connections allowed?
+    recvSocket.listen(1) # TODO: what is the maximum concurrent connections allowed?
     # Establish a connection with clients
     # allow multiple clients to connect concurrently as long as the total number of clents are less than maximum
     while True:
