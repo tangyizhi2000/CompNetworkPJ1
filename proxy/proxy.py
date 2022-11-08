@@ -47,9 +47,9 @@ def parse_mpd():
         bitrate_list.append(cur_bitrate)
         bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))    
 
-def choose_bitrate():
+def choose_bitrate(client_IP, web_server_ip):
     for bitrate in reversed(bitrate_list):
-        if bitrate < T_current / 1.5:
+        if bitrate < T_current[(client_IP, web_server_ip)] / 1.5:
             return bitrate
     return bitrate_list[0]
 '''
@@ -97,7 +97,7 @@ def handle_mpd(client_messages, serverSocket, client_IP, server_IP):
     # status is whether server disconnects; mpd_no_list_file is the thing we need to return
     return status1 and status2, mpd_no_list_file
 
-def handle_video_request(client_messages):
+def handle_video_request(client_messages, client_IP, web_server_ip):
     # parse the client request, and request for appropriate video according to throughput
     decode_message = client_messages.decode()
     # find the client requested bitrate
@@ -109,7 +109,7 @@ def handle_video_request(client_messages):
         else:
             break
     # find appropriate bitrate
-    actual_bitrate = choose_bitrate()
+    actual_bitrate = choose_bitrate(client_IP, web_server_ip)
     # replace client's request with the appropriate bitrate
     client_messages = client_messages.replace(str(requested_bitrate).encode(), str(actual_bitrate).encode())
     return client_messages, actual_bitrate
@@ -168,8 +168,8 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             send_to_end(clientSocket, mpd_no_list_file)
             print("HANDLE MPD")
         elif b'bps/BigBuckBunny_6s' in client_messages:
-            client_messages, actual_bitrate = handle_video_request(client_messages)
-            status, response = time_and_send(serverSocket, client_messages, True)
+            client_messages, actual_bitrate = handle_video_request(client_messages, addr[0], web_server_ip)
+            status, response = time_and_send(serverSocket, client_messages, True, addr[0], web_server_ip)
             # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
             actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+\.m4s', client_messages.decode())
             global log_list
