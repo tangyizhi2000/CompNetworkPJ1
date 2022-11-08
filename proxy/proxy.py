@@ -1,3 +1,4 @@
+from collections import defaultdict
 from threading import Thread
 from socket import *
 import sys
@@ -8,29 +9,27 @@ max_num_connections = 10
 total_num_connections = 0
 mpd_xml = ""
 alpha = 0
-T_current = -1
-T_current_list = []
+T_current = defaultdict(lambda: -1)
 bitrate_list = []
 log_list = []
 log_file = None
 
 # record time and send message
 # after timing ts and tf, we can update the bandwidth prediction
-def time_and_send(serverSocket, client_message, video_chunk):
+def time_and_send(serverSocket, client_message, video_chunk, client_IP, server_IP):
     ts = time.time()
     send_to_end(serverSocket, client_message)
     status, response = receive_from_end(serverSocket)
     tf = time.time()
     # calculate throughput, T = B / (tf-ts)
     if video_chunk:
-        calculate_throughput(sys.getsizeof(response), tf, ts)
+        calculate_throughput(sys.getsizeof(response), tf, ts, client_IP, server_IP)
     return status, response
 
-def calculate_throughput(size, tf, ts):
-    global T_current, alpha, T_current_list, log_list
+def calculate_throughput(size, tf, ts, client_IP, server_IP):
+    global T_current, alpha, log_list
     T = float((size - sys.getsizeof(b'')) / (tf - ts))
-    T_current = alpha * T - (1 - alpha) * T_current
-    T_current_list.append(T_current)
+    T_current[(client_IP, server_IP)] = alpha * T - (1 - alpha) * T_current
     log_list.append(str(time.time()) + " " + str(tf - ts) + " " + str(T) + " " + str(T_current))
 
 # send a message to the target socket
@@ -86,15 +85,15 @@ BigBuckBunny_6s_nolist.mpd
   </Period>
 </MPD>
 '''
-def handle_mpd(client_messages, serverSocket):
+def handle_mpd(client_messages, serverSocket, client_IP, server_IP):
     # request a copy of mpd.xml
-    status1, mpd_file = time_and_send(serverSocket, client_messages, False)
+    status1, mpd_file = time_and_send(serverSocket, client_messages, False, client_IP, server_IP)
     global mpd_xml
     mpd_xml = mpd_file.decode()
     parse_mpd()
     # replace 'BigBuckBunny_6s.mpd' with 'BigBuckBunny_6s_nolist.mpd' and request server a copy of it
     mpd_nolist_request = client_messages.replace(b'BigBuckBunny_6s.mpd', b'BigBuckBunny_6s_nolist.mpd')
-    status2, mpd_no_list_file = time_and_send(serverSocket, mpd_nolist_request, False)
+    status2, mpd_no_list_file = time_and_send(serverSocket, mpd_nolist_request, False, client_IP, server_IP)
     # status is whether server disconnects; mpd_no_list_file is the thing we need to return
     return status1 and status2, mpd_no_list_file
 
@@ -151,7 +150,7 @@ def receive_from_end(endSocket):
         return (True, all_message)
 
 
-def connect(clientSocket, fake_ip, web_server_ip):
+def connect(clientSocket, fake_ip, web_server_ip, addr):
     # Establish a connection with a server
     serverSocket = socket(AF_INET, SOCK_STREAM)
     serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
@@ -163,14 +162,13 @@ def connect(clientSocket, fake_ip, web_server_ip):
             break
         # MPD file request, save the MPD file
         if b'BigBuckBunny_6s.mpd' in client_messages:
-            status, mpd_no_list_file = handle_mpd(client_messages, serverSocket)
+            status, mpd_no_list_file = handle_mpd(client_messages, serverSocket, addr[0], web_server_ip)
             if not status:
                 break
             send_to_end(clientSocket, mpd_no_list_file)
-            print("DEALED WITH MPD")
+            print("HANDLE MPD")
         elif b'bps/BigBuckBunny_6s' in client_messages:
             client_messages, actual_bitrate = handle_video_request(client_messages)
-            print("FINISHED MODIFYING REQUEST")
             status, response = time_and_send(serverSocket, client_messages, True)
             # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
             actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+\.m4s', client_messages.decode())
@@ -178,15 +176,15 @@ def connect(clientSocket, fake_ip, web_server_ip):
             log_list[len(log_list)-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) 
             if len(actual_chunk_name) == 1:
                 log_list[len(log_list)-1] += " " + str(actual_chunk_name[0])
-                #print("client_messages.decode()", client_messages.decode()[:50])
                 log_file.write(log_list[-1])
-                #print(log_list[-1])
+                print(log_list[-1])
             if not status:
                 break
             send_to_end(clientSocket, response)
+            print("HANDLE PROXYING REQUEST")
         else:
             # send to server
-            print("OTHERS", client_messages[:200])
+            print("HANDLE OTHERS MESSAGES")
             send_to_end(serverSocket, client_messages)
             # receive from server
             status, server_response = receive_from_end(serverSocket)
@@ -213,6 +211,5 @@ if __name__ == '__main__':
     while True:
         # Receive a connection from client
         clientSocket, addr = recvSocket.accept()
-        print(addr)
-        worker = Thread(target=connect, args=(clientSocket, fake_ip, web_server_ip))
+        worker = Thread(target=connect, args=(clientSocket, fake_ip, web_server_ip, addr))
         worker.start()
