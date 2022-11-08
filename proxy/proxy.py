@@ -183,7 +183,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             log_list[len(log_list)-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) 
             if len(actual_chunk_name) == 1:
                 log_list[len(log_list)-1] += " " + str(actual_chunk_name[0]) + "\n"
-                log_file.write(log_list[-1])
+                log_file.write(str(log_list[-1]))
                 print(log_list[-1])
             if not status:
                 break
