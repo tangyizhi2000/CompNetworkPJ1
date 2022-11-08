@@ -153,8 +153,9 @@ def receive_from_end(endSocket):
 
 
 def connect(clientSocket, fake_ip, web_server_ip, addr):
-    # logging 
-    log_file = open('proxy.py', 'r') # a log file we can write to
+    # logging
+    print(file_path)
+    log_file = open(file_path, 'w') # a log file we can write to
     print(log_file.readlines()[0:10])
     # Establish a connection with a server
     serverSocket = socket(AF_INET, SOCK_STREAM)
