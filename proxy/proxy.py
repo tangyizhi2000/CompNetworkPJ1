@@ -199,6 +199,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             # send back to client
             send_to_end(clientSocket, server_response)
 
+    log_file.close()
     # close the relevant connections
     clientSocket.close()
     serverSocket.close()
@@ -208,7 +209,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
 if __name__ == '__main__':
     # commandline ./proxy <log> <alpha> <listen-port> <fake-ip> <web-server-ip>
     file_path, alpha, listen_port, fake_ip, web_server_ip = sys.argv[1], float(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5]
-    log_file = open(file_path, 'w') # a log file we can write to
+    log_file = open(file_path, 'a') # a log file we can write to
     recvSocket = socket(AF_INET,SOCK_STREAM) ## create socket listening for requests from client
     recvSocket.bind(('', listen_port)) # Reachable by any address on port listen_port
     recvSocket.listen(1) # TODO: what is the maximum concurrent connections allowed?
