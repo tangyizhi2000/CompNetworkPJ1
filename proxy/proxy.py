@@ -156,7 +156,6 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
     # logging
     print(file_path)
     log_file = open(file_path, 'w') # a log file we can write to
-    print(log_file.readlines()[0:10])
     # Establish a connection with a server
     serverSocket = socket(AF_INET, SOCK_STREAM)
     serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
