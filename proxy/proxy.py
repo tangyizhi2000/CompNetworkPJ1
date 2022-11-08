@@ -190,6 +190,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 print("Video Response:", actual_bitrate, response[:500])
             else:
                 # send to server
+                print("OTHERS", client_messages[:200])
                 send_to_end(serverSocket, client_messages)
                 # receive from server
                 status, server_response = receive_from_end(serverSocket)
@@ -197,7 +198,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                     break
                 # send back to client
                 send_to_end(clientSocket, server_response)
-                print("OTHERS")
+                
                 
         # close the relevant connections
         clientSocket.close()
