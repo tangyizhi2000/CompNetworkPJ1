@@ -12,6 +12,7 @@ T_current = -1
 T_current_list = []
 bitrate_list = []
 log_list = []
+log_file = None
 
 # record time and send message
 # after timing ts and tf, we can update the bandwidth prediction
@@ -149,52 +150,51 @@ def receive_from_end(endSocket):
             all_message = all_message + temp_message
         return (True, all_message)
 
-def connect(recvSocket, fake_ip, web_server_ip):
+
+def connect(clientSocket, fake_ip, web_server_ip):
+    # Establish a connection with a server
+    serverSocket = socket(AF_INET, SOCK_STREAM)
+    serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
+    serverSocket.connect((web_server_ip, 8080)) # connect to the server
     while True:
-        # Receive a connection from client
-        clientSocket, addr = recvSocket.accept()
-        # Establish a connection with a server
-        serverSocket = socket(AF_INET, SOCK_STREAM)
-        serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
-        serverSocket.connect((web_server_ip, 8080)) # connect to the server
-        while True:
-            # receive from client
-            status, client_messages = receive_from_end(clientSocket)
+        # receive from client
+        status, client_messages = receive_from_end(clientSocket)
+        if not status:
+            break
+        # MPD file request, save the MPD file
+        if b'BigBuckBunny_6s.mpd' in client_messages:
+            status, mpd_no_list_file = handle_mpd(client_messages, serverSocket)
             if not status:
                 break
-            # MPD file request, save the MPD file
-            if b'BigBuckBunny_6s.mpd' in client_messages:
-                status, mpd_no_list_file = handle_mpd(client_messages, serverSocket)
-                if not status:
-                    break
-                send_to_end(clientSocket, mpd_no_list_file)
-                print("DEALED WITH MPD")
-            elif b'bps/BigBuckBunny_6s' in client_messages:
-                client_messages, actual_bitrate = handle_video_request(client_messages)
-                print("FINISHED MODIFYING REQUEST")
-                status, response = time_and_send(serverSocket, client_messages, True)
-                # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
-                actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+\.m4s', client_messages.decode())
-                if len(actual_chunk_name) == 0:
-                    print("client_messages.decode()", client_messages.decode()[:50])
-                global log_list
-                log_list[len(log_list)-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) + " " + str(actual_chunk_name)
-                print(log_list[-1])
-                if not status:
-                    break
-                send_to_end(clientSocket, response)
-            else:
-                # send to server
-                print("OTHERS", client_messages[:200])
-                send_to_end(serverSocket, client_messages)
-                # receive from server
-                status, server_response = receive_from_end(serverSocket)
-                if not status:
-                    break
-                # send back to client
-                send_to_end(clientSocket, server_response)
-                
-                
+            send_to_end(clientSocket, mpd_no_list_file)
+            print("DEALED WITH MPD")
+        elif b'bps/BigBuckBunny_6s' in client_messages:
+            client_messages, actual_bitrate = handle_video_request(client_messages)
+            print("FINISHED MODIFYING REQUEST")
+            status, response = time_and_send(serverSocket, client_messages, True)
+            # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
+            actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+\.m4s', client_messages.decode())
+            global log_list
+            log_list[len(log_list)-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) 
+            if len(actual_chunk_name) == 1:
+                log_list[len(log_list)-1] += " " + str(actual_chunk_name[0])
+                #print("client_messages.decode()", client_messages.decode()[:50])
+                log_file.write(log_list[-1])
+                #print(log_list[-1])
+            if not status:
+                break
+            send_to_end(clientSocket, response)
+        else:
+            # send to server
+            print("OTHERS", client_messages[:200])
+            send_to_end(serverSocket, client_messages)
+            # receive from server
+            status, server_response = receive_from_end(serverSocket)
+            if not status:
+                break
+            # send back to client
+            send_to_end(clientSocket, server_response)
+
         # close the relevant connections
         clientSocket.close()
         serverSocket.close()
@@ -203,12 +203,14 @@ def connect(recvSocket, fake_ip, web_server_ip):
 if __name__ == '__main__':
     # commandline ./proxy <log> <alpha> <listen-port> <fake-ip> <web-server-ip>
     file_path, alpha, listen_port, fake_ip, web_server_ip = sys.argv[1], float(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5]
-    log_file = open(file_path, 'w')
+    log_file = open(file_path, 'w') # a log file we can write to
     recvSocket = socket(AF_INET,SOCK_STREAM) ## create socket listening for requests from client
     recvSocket.bind(('', listen_port)) # Reachable by any address on port listen_port
     recvSocket.listen(max_num_connections) # TODO: what is the maximum concurrent connections allowed?
     # Establish a connection with clients
     # allow multiple clients to connect concurrently as long as the total number of clents are less than maximum
-    for i in range(1):
-        worker = Thread(target=connect, args=(recvSocket, fake_ip, web_server_ip))
+    while True:
+        # Receive a connection from client
+        clientSocket, addr = recvSocket.accept()
+        worker = Thread(target=connect, args=(clientSocket, fake_ip, web_server_ip))
         worker.start()
