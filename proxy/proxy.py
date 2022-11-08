@@ -12,7 +12,7 @@ alpha = 0
 T_current = defaultdict(lambda: -1)
 bitrate_list = []
 log_list = []
-log_file = None
+file_path = None
 
 # record time and send message
 # after timing ts and tf, we can update the bandwidth prediction
@@ -153,6 +153,8 @@ def receive_from_end(endSocket):
 
 
 def connect(clientSocket, fake_ip, web_server_ip, addr):
+    # logging 
+    log_file = open(file_path, 'w') # a log file we can write to
     # Establish a connection with a server
     serverSocket = socket(AF_INET, SOCK_STREAM)
     serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
@@ -179,8 +181,6 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             log_list[len(log_list)-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) 
             if len(actual_chunk_name) == 1:
                 log_list[len(log_list)-1] += " " + str(actual_chunk_name[0]) + "\n"
-                global log_file
-                log_file.write('aaaa')
                 log_file.write(log_list[-1])
                 #print(log_file.readlines()[-1])
                 #print(log_list[-1])
@@ -209,9 +209,6 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
 if __name__ == '__main__':
     # commandline ./proxy <log> <alpha> <listen-port> <fake-ip> <web-server-ip>
     file_path, alpha, listen_port, fake_ip, web_server_ip = sys.argv[1], float(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5]
-    log_file = open(file_path, 'a') # a log file we can write to
-    log_file.write('aaaa')
-    log_file.write('bbbb')
     recvSocket = socket(AF_INET,SOCK_STREAM) ## create socket listening for requests from client
     recvSocket.bind(('', listen_port)) # Reachable by any address on port listen_port
     recvSocket.listen(1) # TODO: what is the maximum concurrent connections allowed?
