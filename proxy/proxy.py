@@ -174,7 +174,7 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 print("FINISHED MODIFYING REQUEST")
                 status, response = time_and_send(serverSocket, client_messages, True)
                 # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
-                actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+\.m4s', client_messages.decode())
+                actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+\.m4a', client_messages.decode())
                 global log_list
                 print("???", len(log_list), log_list[0], log_list[-1])
                 log_list[len(log_list)-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) + " " + str(actual_chunk_name)
