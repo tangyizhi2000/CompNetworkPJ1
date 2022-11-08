@@ -149,7 +149,7 @@ def receive_from_end(endSocket):
         while content_length > 0:
             temp_message = endSocket.recv(content_length_cp)
             content_length = content_length - len(temp_message)
-            all_message = all_message + temp_message[end_of_header:]
+            all_message = all_message + temp_message
         return (True, all_message)
 
 def connect(recvSocket, fake_ip, web_server_ip):
