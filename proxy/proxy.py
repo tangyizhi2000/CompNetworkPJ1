@@ -11,7 +11,7 @@ alpha = 0
 T_current = -1
 T_current_list = []
 bitrate_list = []
-log_list = []
+log = ""
 
 # record time and send message
 # after timing ts and tf, we can update the bandwidth prediction
@@ -26,11 +26,11 @@ def time_and_send(serverSocket, client_message, video_chunk):
     return status, response
 
 def calculate_throughput(size, tf, ts):
-    global T_current, alpha, T_current_list, log_list
+    global T_current, alpha, T_current_list, log
     T = float((size - sys.getsizeof(b'')) / (tf - ts))
     T_current = alpha * T - (1 - alpha) * T_current
     T_current_list.append(T_current)
-    log_list.append(str(time.time()) + " " + str(tf - ts) + " " + str(T) + " " + str(T_current))
+    log = str(time.time()) + " " + str(tf - ts) + " " + str(T) + " " + str(T_current)
 
 # send a message to the target socket
 def send_to_end(endSocket, message):
@@ -175,10 +175,9 @@ def connect(recvSocket, fake_ip, web_server_ip):
                 status, response = time_and_send(serverSocket, client_messages, True)
                 # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
                 actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+\.m4s', client_messages.decode())
-                global log_list
-                print("???", len(log_list), log_list[0], log_list[-1])
-                log_list[len(log_list)-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) + " " + str(actual_chunk_name[0])
-                print(log_list[-1])
+                global log
+                log += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) + " " + str(actual_chunk_name[0])
+                print(log)
                 if not status:
                     break
                 send_to_end(clientSocket, response)
