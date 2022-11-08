@@ -47,11 +47,13 @@ def parse_mpd():
         bitrate_list.append(cur_bitrate)
         bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))    
 
+
 def choose_bitrate(client_IP, web_server_ip):
     for bitrate in reversed(bitrate_list):
         if bitrate < T_current[(client_IP, web_server_ip)] / 1.5:
             return bitrate
     return bitrate_list[0]
+
 '''
 BigBuckBunny_6s.mpd
 <?xml version="1.0" encoding="UTF-8"?>
@@ -156,6 +158,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
     serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
     serverSocket.connect((web_server_ip, 8080)) # connect to the server
     while True:
+        print(web_server_ip, addr)
         # receive from client
         status, client_messages = receive_from_end(clientSocket)
         if not status:
@@ -175,7 +178,8 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             global log_list
             log_list[len(log_list)-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) 
             if len(actual_chunk_name) == 1:
-                log_list[len(log_list)-1] += " " + str(actual_chunk_name[0])
+                log_list[len(log_list)-1] += " " + str(actual_chunk_name[0]) + "\n"
+                global log_file
                 log_file.write(log_list[-1])
                 print(log_list[-1])
             if not status:
