@@ -25,12 +25,12 @@ def time_and_send(serverSocket, client_message, video_chunk, client_IP, server_I
     tf = time.time()
     # calculate throughput, T = B / (tf-ts)
     if video_chunk:
-        calculate_throughput(sys.getsizeof(response), tf, ts, client_IP, server_IP)
+        calculate_throughput(len(response), tf, ts, client_IP, server_IP)
     return status, response
 
 def calculate_throughput(size, tf, ts, client_IP, server_IP):
     global T_current, alpha, log_list
-    T = float((size - sys.getsizeof(b'')) / (tf - ts))
+    T = float(size / (tf - ts))
     if T_current[(client_IP, server_IP)] == -1:
         T_current[(client_IP, server_IP)] = bitrate_list[0]
     else:
