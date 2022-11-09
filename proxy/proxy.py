@@ -1,3 +1,5 @@
+#!/usr/bin/env python3.10
+
 from collections import defaultdict
 from threading import Thread
 from socket import *
@@ -158,7 +160,6 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
     serverSocket.bind((fake_ip, 0)) # Socket bind to fake_ip and OS will pick one port
     serverSocket.connect((web_server_ip, 8080)) # connect to the server
     while True:
-        print(web_server_ip, addr)
         # receive from client
         status, client_messages = receive_from_end(clientSocket)
         if not status:
@@ -169,7 +170,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             if not status:
                 break
             send_to_end(clientSocket, mpd_no_list_file)
-            print("HANDLE MPD")
+            #print("HANDLE MPD")
         elif b'bps/BigBuckBunny_6s' in client_messages:
             client_messages, actual_bitrate = handle_video_request(client_messages, addr[0], web_server_ip)
             status, response = time_and_send(serverSocket, client_messages, True, addr[0], web_server_ip)
@@ -187,10 +188,10 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             if not status:
                 break
             send_to_end(clientSocket, response)
-            print("HANDLE PROXYING REQUEST")
+            #print("HANDLE PROXYING REQUEST")
         else:
             # send to server
-            print("HANDLE OTHERS MESSAGES")
+            #print("HANDLE OTHERS MESSAGES")
             send_to_end(serverSocket, client_messages)
             # receive from server
             status, server_response = receive_from_end(serverSocket)
