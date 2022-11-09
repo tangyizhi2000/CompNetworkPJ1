@@ -184,7 +184,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             global log_list
             log_list[len(log_list)-1] += " " + str(int(actual_bitrate/1000)) + " " + str(web_server_ip) 
             if len(actual_chunk_name) == 1:
-                log_list[len(log_list)-1] += " " + str(actual_chunk_name[0]) + "\n"
+                log_list[-1] += " " + str(actual_chunk_name[0]) + "\n"
                 # a log file we can write to
                 log_file = open(file_path, 'a')
                 log_file.write(str(log_list[-1]))
