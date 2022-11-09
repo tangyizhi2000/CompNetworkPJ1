@@ -35,7 +35,7 @@ def calculate_throughput(size, tf, ts, client_IP, server_IP, send_time):
         T_current[(client_IP, server_IP)] = bitrate_list[0]
     else:
         T_current[(client_IP, server_IP)] = alpha * T + (1 - alpha) * T_current[(client_IP, web_server_ip)]
-    log_list.append(str(time.time()) + " " + str(send_time) + " " + str(T) + " " + str(T_current[(client_IP, web_server_ip)]))
+    log_list.append(str(time.time()) + " " + str(send_time) + " " + str(T/1000) + " " + str(T_current[(client_IP, web_server_ip)]/1000))
 
 # send a message to the target socket
 def send_to_end(endSocket, message):
@@ -189,7 +189,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
                 log_file = open(file_path, 'a')
                 log_file.write(str(log_list[-1]))
                 log_file.close()
-                print(log_list[-1])
+                print(log_list[-1][:-1])
             if not status:
                 break
             send_to_end(clientSocket, response)
