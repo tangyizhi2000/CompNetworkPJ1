@@ -31,7 +31,7 @@ def time_and_send(serverSocket, client_message, video_chunk, client_IP, server_I
 def calculate_throughput(size, tf, ts, client_IP, server_IP):
     global T_current, alpha, log_list
     T = float((size - sys.getsizeof(b'')) / (tf - ts))
-    T_current[(client_IP, server_IP)] = alpha * T - (1 - alpha) * T_current[(client_IP, web_server_ip)]
+    T_current[(client_IP, server_IP)] = alpha * T + (1 - alpha) * T_current[(client_IP, web_server_ip)]
     log_list.append(str(time.time()) + " " + str(tf - ts) + " " + str(T) + " " + str(T_current[(client_IP, web_server_ip)]))
 
 # send a message to the target socket
