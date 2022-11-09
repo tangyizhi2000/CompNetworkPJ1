@@ -170,7 +170,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             break
         # MPD file request, save the MPD file
         if b'BigBuckBunny_6s.mpd' in client_messages:
-            status, mpd_no_list_file = handle_mpd(client_messages, serverSocket, addr[0], web_server_ip)
+            status, mpd_no_list_file = handle_mpd(client_messages, serverSocket, addr[0], web_server_ip, ts)
             if not status:
                 break
             send_to_end(clientSocket, mpd_no_list_file)
