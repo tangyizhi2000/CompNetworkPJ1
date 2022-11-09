@@ -18,8 +18,7 @@ file_path = None
 
 # record time and send message
 # after timing ts and tf, we can update the bandwidth prediction
-def time_and_send(serverSocket, client_message, video_chunk, client_IP, server_IP):
-    ts = time.time()
+def time_and_send(serverSocket, client_message, video_chunk, client_IP, server_IP, ts):
     send_to_end(serverSocket, client_message)
     status, response = receive_from_end(serverSocket)
     tf = time.time()
@@ -51,7 +50,7 @@ def parse_mpd():
                 cur_bitrate = cur_bitrate * 10 + int(mpd_xml[i])
         bitrate_list.append(cur_bitrate)
         bitrate_loc = mpd_xml.find('bandwidth=\"', bitrate_loc + 10, len(mpd_xml))    
-
+    bitrate_list.sort()
 
 def choose_bitrate(client_IP, web_server_ip):
     for bitrate in reversed(bitrate_list):
@@ -92,15 +91,15 @@ BigBuckBunny_6s_nolist.mpd
   </Period>
 </MPD>
 '''
-def handle_mpd(client_messages, serverSocket, client_IP, server_IP):
+def handle_mpd(client_messages, serverSocket, client_IP, server_IP, ts):
     # request a copy of mpd.xml
-    status1, mpd_file = time_and_send(serverSocket, client_messages, False, client_IP, server_IP)
+    status1, mpd_file = time_and_send(serverSocket, client_messages, False, client_IP, server_IP, ts)
     global mpd_xml
     mpd_xml = mpd_file.decode()
     parse_mpd()
     # replace 'BigBuckBunny_6s.mpd' with 'BigBuckBunny_6s_nolist.mpd' and request server a copy of it
     mpd_nolist_request = client_messages.replace(b'BigBuckBunny_6s.mpd', b'BigBuckBunny_6s_nolist.mpd')
-    status2, mpd_no_list_file = time_and_send(serverSocket, mpd_nolist_request, False, client_IP, server_IP)
+    status2, mpd_no_list_file = time_and_send(serverSocket, mpd_nolist_request, False, client_IP, server_IP, ts)
     # status is whether server disconnects; mpd_no_list_file is the thing we need to return
     return status1 and status2, mpd_no_list_file
 
@@ -165,6 +164,8 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
     while True:
         # receive from client
         status, client_messages = receive_from_end(clientSocket)
+        # timing
+        ts = time.time()
         if not status:
             break
         # MPD file request, save the MPD file
@@ -176,7 +177,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             #print("HANDLE MPD")
         elif b'bps/BigBuckBunny_6s' in client_messages:
             client_messages, actual_bitrate = handle_video_request(client_messages, addr[0], web_server_ip)
-            status, response = time_and_send(serverSocket, client_messages, True, addr[0], web_server_ip)
+            status, response = time_and_send(serverSocket, client_messages, True, addr[0], web_server_ip, ts)
             # logging /bunny_1006743bps/BigBuckBunny_6s_(init|[0-9]).mp4
             actual_chunk_name = re.findall('[.]*/bunny_[0-9]*bps/BigBuckBunny_6s[0-9]+\.m4s', client_messages.decode())
             global log_list
@@ -203,7 +204,6 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
             # send back to client
             send_to_end(clientSocket, server_response)
 
-    log_file.close()
     # close the relevant connections
     clientSocket.close()
     serverSocket.close()
