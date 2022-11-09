@@ -19,23 +19,23 @@ file_path = None
 # record time and send message
 # after timing ts and tf, we can update the bandwidth prediction
 def time_and_send(serverSocket, client_message, video_chunk, client_IP, server_IP, ts):
-    ts = time.time()
     send_to_end(serverSocket, client_message)
+    t2 = time.time()
     status, response = receive_from_end(serverSocket)
     tf = time.time()
     # calculate throughput, T = B / (tf-ts)
     if video_chunk:
-        calculate_throughput(len(response), tf, ts, client_IP, server_IP)
+        calculate_throughput(len(response), tf, ts, client_IP, server_IP, tf-t2)
     return status, response
 
-def calculate_throughput(size, tf, ts, client_IP, server_IP):
+def calculate_throughput(size, tf, ts, client_IP, server_IP, send_time):
     global T_current, alpha, log_list
     T = float(size / (tf - ts))
     if T_current[(client_IP, server_IP)] == -1:
         T_current[(client_IP, server_IP)] = bitrate_list[0]
     else:
         T_current[(client_IP, server_IP)] = alpha * T + (1 - alpha) * T_current[(client_IP, web_server_ip)]
-    log_list.append(str(time.time()) + " " + str(tf - ts) + " " + str(T) + " " + str(T_current[(client_IP, web_server_ip)]))
+    log_list.append(str(time.time()) + " " + str(send_time) + " " + str(T) + " " + str(T_current[(client_IP, web_server_ip)]))
 
 # send a message to the target socket
 def send_to_end(endSocket, message):
