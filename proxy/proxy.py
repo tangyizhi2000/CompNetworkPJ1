@@ -32,7 +32,7 @@ def calculate_throughput(size, tf, ts, client_IP, server_IP):
     global T_current, alpha, log_list
     T = float((size - sys.getsizeof(b'')) / (tf - ts))
     T_current[(client_IP, server_IP)] = alpha * T + (1 - alpha) * T_current[(client_IP, web_server_ip)]
-    log_list.append(str(time.time()) + " " + str(tf - ts) + " " + str(T) + " " + str(T_current[(client_IP, web_server_ip)]))
+    log_list.append(str(time.time()) + " " + str(tf - ts) + " " + str(T/1000) + " " + str(T_current[(client_IP, web_server_ip)]/1000))
 
 # send a message to the target socket
 def send_to_end(endSocket, message):
