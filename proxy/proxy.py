@@ -184,7 +184,7 @@ def connect(clientSocket, fake_ip, web_server_ip, addr):
                 log_file = open(file_path, 'a')
                 log_file.write(str(log_list[-1]))
                 log_file.close()
-                print(log_list[-1])
+                print(log_list[-1][:-1])
             if not status:
                 break
             send_to_end(clientSocket, response)
